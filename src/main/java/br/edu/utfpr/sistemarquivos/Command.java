@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.sql.SQLOutput;
 
 public enum Command {
 
@@ -19,7 +18,8 @@ public enum Command {
         @Override
         Path execute(Path path) throws IOException {
 
-            Files.list(path).forEach(System.out::println);
+            // TODO implementar conforme enunciado
+          System.out.println(Files.list(path));
 
             return path;
         }
@@ -39,16 +39,17 @@ public enum Command {
         }
 
         @Override
-        Path execute(Path path) {
-            Path finalPath = Paths.get(path + File.separator + parameters[1]);
+        Path execute(Path path) throws IOException{
+
+            Path finalPath = Paths.get("" + path + File.separator + this.parameters[1]);
             boolean isDirectory = Files.isDirectory(finalPath);
-            if(isDirectory){
+            if (isDirectory) {
                 System.out.println("ERRO: Acessando um diretorio!");
-            }
-            else{
+            } else {
                 FileReader file = new FileReader();
                 file.read(finalPath);
             }
+
             return path;
         }
     },
