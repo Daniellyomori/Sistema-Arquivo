@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributeView;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.sql.SQLOutput;
 
 public enum Command {
 
@@ -19,7 +22,18 @@ public enum Command {
         Path execute(Path path) throws IOException {
 
             // TODO implementar conforme enunciado
-          System.out.println(Files.list(path));
+            System.out.println("Content of " + path);
+            //Files.list(path).forEach(System.out::println);
+
+            String[] elements;
+
+            File file = new File(path.toString());
+
+            elements = file.list();
+            for(String element: elements){
+                System.out.println(element);
+            }
+
 
             return path;
         }
@@ -44,7 +58,7 @@ public enum Command {
             Path finalPath = Paths.get("" + path + File.separator + this.parameters[1]);
             boolean isDirectory = Files.isDirectory(finalPath);
             if (isDirectory) {
-                System.out.println("ERRO: Acessando um diretorio!");
+                System.out.println("This command should be used with files only");
             } else {
                 FileReader file = new FileReader();
                 file.read(finalPath);
@@ -64,7 +78,19 @@ public enum Command {
         Path execute(Path path) {
 
             // TODO implementar conforme enunciado
-
+            String teste = File.separator;
+            String[] pathArray = (path.toString()).split(teste);
+            System.out.println(pathArray);
+            String pathFinal = "";
+            for(int i = 0; i < pathArray.length; i ++){
+                if(i == pathArray.length - 1){
+                    pathFinal = pathFinal + pathArray[i];
+                }
+                else{
+                    pathFinal = pathFinal + File.separator + pathArray[i];
+                }
+            }
+            System.out.println(pathFinal);
             return path;
         }
     },
@@ -86,6 +112,11 @@ public enum Command {
         Path execute(Path path) {
 
             // TODO implementar conforme enunciado
+            path = Paths.get("" + path + File.separator + this.parameters[1]);
+
+            if(!Files.isDirectory(path)){
+                System.out.println("Extension not supported");
+            }
 
             return path;
         }
@@ -105,9 +136,21 @@ public enum Command {
         }
 
         @Override
-        Path execute(Path path) {
+        Path execute(Path path) throws IOException {
 
             // TODO implementar conforme enunciado
+
+            if(parameters[1] != null){
+                path = Paths.get("" + path + File.separator + this.parameters[1]);
+
+            }
+
+            BasicFileAttributeView view = Files.getFileAttributeView(path, BasicFileAttributeView.class);
+            BasicFileAttributes basicAttribs = view.readAttributes();
+            System.out.println("Is directory [" + basicAttribs.isDirectory() +"]");
+            System.out.println("Size [" + basicAttribs.size() +"]");
+            System.out.println("Created on [" + basicAttribs.creationTime() +"]");
+            System.out.println("Last access time [" + basicAttribs.lastAccessTime() +"]");
 
             return path;
         }
