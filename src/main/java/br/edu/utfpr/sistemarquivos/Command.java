@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.sql.SQLOutput;
+import java.util.Arrays;
 
 public enum Command {
 
@@ -21,19 +21,15 @@ public enum Command {
         @Override
         Path execute(Path path) throws IOException {
 
-            // TODO implementar conforme enunciado
             System.out.println("Content of " + path);
-            //Files.list(path).forEach(System.out::println);
 
             String[] elements;
-
             File file = new File(path.toString());
 
             elements = file.list();
             for(String element: elements){
                 System.out.println(element);
             }
-
 
             return path;
         }
@@ -55,14 +51,34 @@ public enum Command {
         @Override
         Path execute(Path path) throws IOException{
 
-            Path finalPath = Paths.get("" + path + File.separator + this.parameters[1]);
-            boolean isDirectory = Files.isDirectory(finalPath);
-            if (isDirectory) {
-                System.out.println("This command should be used with files only");
-            } else {
-                FileReader file = new FileReader();
-                file.read(finalPath);
+            int tam = parameters.length;
+            if(tam < 2)
+            {
+                System.out.println("Parameter not informed");
+                return path;
             }
+
+            Path finalPath = Paths.get("" + path + File.separator + this.parameters[1]);
+
+            if(!Files.exists(finalPath)){
+                System.out.println("File do not exists");
+                return path;
+            }
+
+            if (Files.isDirectory(finalPath)) {
+                System.out.println("This command should be used with files only");
+                return path;
+            }
+
+            String extension = Arrays.stream(parameters[1].split("\\.")).reduce((a, b) -> b).orElse(null);
+
+            if(!extension.equals("txt")){
+                System.out.println("Extension not supported");
+                return path;
+            }
+
+            FileReader file = new FileReader();
+            file.read(finalPath);
 
             return path;
         }
@@ -76,21 +92,26 @@ public enum Command {
 
         @Override
         Path execute(Path path) {
+            String root = Application.ROOT;
 
-            // TODO implementar conforme enunciado
-            String teste = File.separator;
-            String[] pathArray = (path.toString()).split(teste);
-            System.out.println(pathArray);
+            if((path.toString()).equals(root)){
+                System.out.println("In the ROOT already");
+                return path;
+            }
+
+            String split =  File.separator.replace("\\", "\\\\");
+            String[] pathArray = (path.toString()).split(split);
+
             String pathFinal = "";
-            for(int i = 0; i < pathArray.length; i ++){
-                if(i == pathArray.length - 1){
-                    pathFinal = pathFinal + pathArray[i];
+            for(int i = 0; i < pathArray.length - 1; i ++){
+                if(i == 0){
+                    pathFinal =  pathArray[i] +  File.separator ;
                 }
                 else{
-                    pathFinal = pathFinal + File.separator + pathArray[i];
+                    pathFinal = pathFinal + pathArray[i] + File.separator;
                 }
             }
-            System.out.println(pathFinal);
+            path = Paths.get(pathFinal);
             return path;
         }
     },
@@ -111,11 +132,22 @@ public enum Command {
         @Override
         Path execute(Path path) {
 
-            // TODO implementar conforme enunciado
-            path = Paths.get("" + path + File.separator + this.parameters[1]);
+            int tam = parameters.length;
+            if(tam < 2){
+                System.out.println("Parameter not informed");
+                return path;
+            }
 
-            if(!Files.isDirectory(path)){
+            Path finalPath = Paths.get("" + path + File.separator + this.parameters[1]);
+
+            if(!Files.exists(finalPath)){
+                System.out.println("Directory do not exists");
+            }
+            else if(!Files.isDirectory(finalPath)){
                 System.out.println("Extension not supported");
+            }
+            else{
+                path = finalPath;
             }
 
             return path;
@@ -137,15 +169,22 @@ public enum Command {
 
         @Override
         Path execute(Path path) throws IOException {
+            Path finalPath = null;
+            int tam = parameters.length;
 
-            // TODO implementar conforme enunciado
-
-            if(parameters[1] != null){
-                path = Paths.get("" + path + File.separator + this.parameters[1]);
-
+            if(tam < 2){
+                System.out.println("Parameter not informed");
+                return path;
             }
 
-            BasicFileAttributeView view = Files.getFileAttributeView(path, BasicFileAttributeView.class);
+            finalPath = Paths.get("" + path + File.separator + this.parameters[1]);
+
+            if(!Files.exists(finalPath)){
+                System.out.println("Directory/File does not exists");
+                return path;
+            }
+
+            BasicFileAttributeView view = Files.getFileAttributeView(finalPath, BasicFileAttributeView.class);
             BasicFileAttributes basicAttribs = view.readAttributes();
             System.out.println("Is directory [" + basicAttribs.isDirectory() +"]");
             System.out.println("Size [" + basicAttribs.size() +"]");
